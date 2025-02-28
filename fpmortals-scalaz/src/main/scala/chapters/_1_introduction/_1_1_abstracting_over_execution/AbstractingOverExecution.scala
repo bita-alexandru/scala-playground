@@ -59,21 +59,21 @@ object AbstractingOverExecution {
   import Execution.Ops
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  private def _echo[C[_]](t: Terminal[C], e: Execution[C]): C[String] =
+  def _echo[C[_]](t: Terminal[C], e: Execution[C]): C[String] =
     e.chain(t.read()) { in: String =>
       e.chain(t.write(in)) { _: Unit =>
         e.create(in)
       }
     }
 
-  private def echo[C[_]](implicit t: Terminal[C], e: Execution[C]): C[String] =
+  def echo[C[_]](implicit t: Terminal[C], e: Execution[C]): C[String] =
     for {
       in <- t.read()
       _ <- t.write(in)
     } yield in
 
-  private implicit val terminalNow: Terminal[Now] = new TerminalSync
-  private implicit val terminalFuture: Terminal[Future] = new TerminalAsync()
+  implicit val terminalNow: Terminal[Now] = new TerminalSync
+  implicit val terminalFuture: Terminal[Future] = new TerminalAsync()
 
   def main(): Unit = {
     echo[Now]: Now[String]
